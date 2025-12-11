@@ -125,17 +125,20 @@ async function initializeDatabase() {
                 if (err) console.error('⚠️  Error creating streams table:', err.message);
             });
 
-            // Create videos table (from Streamflow)
+            // Create videos table (from Streamflow) - FIXED SCHEMA!
             db.run(`
         CREATE TABLE IF NOT EXISTS videos (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           title TEXT NOT NULL,
           description TEXT,
-          file_path TEXT NOT NULL,
-          thumbnail TEXT,
+          filepath TEXT NOT NULL,
+          thumbnail_path TEXT,
           duration INTEGER,
-          file_size INTEGER,
+          filesize INTEGER,
+          resolution TEXT,
+          bitrate INTEGER,
+          fps INTEGER,
           status TEXT DEFAULT 'ready',
           upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
