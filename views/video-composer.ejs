@@ -1,0 +1,278 @@
+<%- layout('layouts/boilerplate') %>
+
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-3">
+                    <i class="bi bi-film"></i> Video Composer
+                </h1>
+                <p class="text-muted">
+                    Assemble looping videos with generated audio using ping-pong or standard looping
+                </p>
+            </div>
+        </div>
+
+        <!-- Video Assembly Form -->
+        <div class="row">
+            <!-- Configuration Panel -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-gear"></i> Assembly Configuration
+                    </div>
+                    <div class="card-body">
+                        <form id="video-config-form">
+                            <!-- Source Video Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-camera-video"></i> Source Video Loop
+                                </label>
+                                <select class="form-select" id="sourceVideo" name="sourceVideo" required>
+                                    <option value="">Select a video from gallery...</option>
+                                    <!-- Loaded via JavaScript -->
+                                </select>
+                                <div class="form-text">
+                                    Choose a video clip to loop. Short clips (5-30 seconds) work best.
+                                </div>
+                            </div>
+
+                            <!-- Video Preview -->
+                            <div id="video-preview" class="mb-4" style="display: none;">
+                                <video controls class="w-100" style="max-height: 300px;" id="preview-player">
+                                    Your browser does not support the video element.
+                                </video>
+                                <div class="mt-2 small text-muted">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            Duration: <span id="preview-duration">-</span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Resolution: <span id="preview-resolution">-</span>
+                                        </div>
+                                        <div class="col-md-4">
+                                            Size: <span id="preview-size">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Audio Source Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-music-note"></i> Audio Source
+                                </label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="audioSource" id="useGenerated"
+                                        value="generated" checked>
+                                    <label class="btn btn-outline-primary" for="useGenerated">
+                                        <i class="bi bi-stars"></i> Use Generated Audio
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="audioSource" id="useExisting"
+                                        value="existing">
+                                    <label class="btn btn-outline-primary" for="useExisting">
+                                        <i class="bi bi-file-music"></i> Use Existing Audio
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Generated Audio Section -->
+                            <div id="generated-audio-section">
+                                <div class="card bg-light mb-4">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-music-note-beamed"></i> Generate New Audio
+                                        </h6>
+                                        <div class="d-grid">
+                                            <a href="/audio-studio" class="btn btn-primary" target="_blank">
+                                                <i class="bi bi-arrow-right"></i> Go to Audio Studio
+                                            </a>
+                                        </div>
+                                        <div class="form-text mt-2">
+                                            Or select from previously generated audio below
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <select class="form-select" id="generatedAudio" name="generated Audio">
+                                    <option value="">Select generated audio...</option>
+                                    <!-- Loaded via JavaScript -->
+                                </select>
+                            </div>
+
+                            <!-- Existing Audio Section -->
+                            <div id="existing-audio-section" style="display: none;">
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="audioFile" accept="audio/*">
+                                    <label class="input-group-text" for="audioFile">
+                                        <i class="bi bi-upload"></i> Upload
+                                    </label>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- Loop Type -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Loop Type
+                                    <i class="bi bi-info-circle" data-bs-toggle="tooltip"
+                                        title="Ping-pong creates seamless A→Reverse→A loops. Standard repeats the clip normally."></i>
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card loop-type-card" data-loop-type="ping-pong" role="button">
+                                            <div class="card-body text-center">
+                                                <i class="bi bi-arrow-left-right fs-1 text-primary"></i>
+                                                <h5 class="mt-2">Ping-Pong</h5>
+                                                <p class="small text-muted mb-0">
+                                                    A → Reverse → A → Reverse<br>
+                                                    <strong>Seamless transitions</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card loop-type-card" data-loop-type="standard" role="button">
+                                            <div class="card-body text-center">
+                                                <i class="bi bi-arrow-repeat fs-1 text-secondary"></i>
+                                                <h5 class="mt-2">Standard</h5>
+                                                <p class="small text-muted mb-0">
+                                                    A → A → A → A<br>
+                                                    <strong>Traditional looping</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="loopType" name="loopType" value="ping-pong">
+                            </div>
+
+                            <!-- Output Name -->
+                            <div class="mb-4">
+                                <label for="outputName" class="form-label">
+                                    Output Name (Optional)
+                                </label>
+                                <input type="text" class="form-control" id="outputName" name="outputName"
+                                    placeholder="my_video.mp4">
+                                <div class="form-text">
+                                    Leave blank for auto-generated name
+                                </div>
+                            </div>
+
+                            <!-- Action Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg" id="assemble-btn">
+                                    <i class="bi bi-play-circle"></i> Assemble Video
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar: Info & Progress -->
+            <div class="col-lg-4">
+                <!-- Info Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-lightbulb"></i> How It Works
+                    </div>
+                    <div class="card-body">
+                        <ol class="small mb-0">
+                            <li class="mb-2">Select a short video clip from gallery</li>
+                            <li class="mb-2">Generate or upload audio for background</li>
+                            <li class="mb-2">Choose loop type (ping-pong recommended)</li>
+                            <li class="mb-2">Click Assemble - video will loop to match audio length</li>
+                        </ol>
+                        <hr>
+                        <p class="small text-muted mb-0">
+                            <strong>Tip:</strong> Ping-pong looping creates smoother transitions by reversing the video,
+                            avoiding jump cuts.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Progress Card -->
+                <div class="card" id="progress-card" style="display: none;">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-hourglass-split"></i> Assembling Video...
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                                    id="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        <p class="mb-0 small" id="progress-message">
+                            Initializing...
+                        </p>
+                        <p class="mb-0 small text-muted" id="progress-time">
+                            Elapsed: 0s
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Result Card -->
+                <div class="card" id="result-card" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-check-circle"></i> Video Assembled!
+                    </div>
+                    <div class="card-body">
+                        <video controls class="w-100 mb-3" id="result-video">
+                            Your browser does not support the video element.
+                        </video>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-primary" id="download-video-btn" download>
+                                <i class="bi bi-download"></i> Download Video
+                            </a>
+                            <button class="btn btn-outline-secondary" id="new-video-btn">
+                                <i class="bi bi-arrow-repeat"></i> Assemble New
+                            </button>
+                        </div>
+                        <hr>
+                        <div class="small text-muted">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>File Size:</span>
+                                <span id="result-video-size">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Duration:</span>
+                                <span id="result-video-duration">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Assembly Time:</span>
+                                <span id="result-video-time">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/video-composer.js"></script>
+
+    <style>
+        .loop-type-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
+        }
+
+        .loop-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .loop-type-card.selected {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+
+        #video-preview video {
+            border-radius: 8px;
+            background: #000;
+        }
+    </style>

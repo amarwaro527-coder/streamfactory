@@ -1,0 +1,257 @@
+<%- layout('layouts/boilerplate') %>
+
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-3">
+                    <i class="bi bi-youtube"></i> YouTube Publisher
+                </h1>
+                <p class="text-muted">
+                    Publish your videos directly to YouTube with one click
+                </p>
+            </div>
+        </div>
+
+        <!-- YouTube Connection Status -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card" id="connection-card">
+                    <div class="card-body">
+                        <!-- Not Connected State -->
+                        <div id="not-connected-state">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-2">
+                                        <i class="bi bi-youtube text-danger"></i> YouTube Not Connected
+                                    </h5>
+                                    <p class="text-muted mb-0">
+                                        Connect your YouTube account to start publishing videos
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="/youtube/auth" class="btn btn-danger btn-lg">
+                                        <i class="bi bi-youtube"></i> Connect YouTube
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connected State -->
+                        <div id="connected-state" style="display:none;">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <img src="" id="channel-thumbnail" class="rounded-circle" width="80" height="80"
+                                        alt="Channel">
+                                </div>
+                                <div class="col-md-7">
+                                    <h5 class="mb-1" id="channel-title">Channel Name</h5>
+                                    <p class="text-muted small mb-0">
+                                        <span id="channel-subscribers">0</span> subscribers •
+                                        <span id="channel-videos">0</span> videos
+                                    </p>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <button class="btn btn-outline-danger" id="disconnect-btn">
+                                        <i class="bi bi-box-arrow-right"></i> Disconnect
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Publisher Panel -->
+        <div class="row" id="publisher-panel" style="display:none;">
+            <!-- Upload Form -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-upload"></i> Publish Video
+                    </div>
+                    <div class="card-body">
+                        <form id="publish-form">
+                            <!-- Project Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-folder"></i> Select Video Project
+                                </label>
+                                <select class="form-select" id="projectSelect" name="projectId" required>
+                                    <option value="">Select a project with video...</option>
+                                    <!-- Loaded via JavaScript -->
+                                </select>
+                                <div class="form-text">
+                                    Choose a project that has assembled video
+                                </div>
+                            </div>
+
+                            <!-- Video Preview -->
+                            <div id="video-preview-section" style="display:none;" class="mb-4">
+                                <video controls class="w-100" style="max-height: 300px; border-radius: 8px;"
+                                    id="preview-player">
+                                    Your browser does not support the video element.
+                                </video>
+                                <div class="mt-2 small text-muted">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            Duration: <span id="preview-duration">-</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            Size: <span id="preview-size">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metadata Summary (Auto-filled from Phase 4) -->
+                            <div id="metadata-summary" style="display:none;" class="mb-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-info-circle"></i> Video Metadata
+                                        </h6>
+                                        <div class="mb-2">
+                                            <strong>Title:</strong>
+                                            <div id="summary-title" class="text-muted">-</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Description:</strong>
+                                            <div id="summary-description" class="text-muted small"
+                                                style="max-height: 100px; overflow-y: auto;">-</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Tags:</strong>
+                                            <div id="summary-tags" class="text-muted small">-</div>
+                                        </div>
+                                        <div>
+                                            <strong>Privacy:</strong>
+                                            <span id="summary-privacy" class="badge bg-secondary">-</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="/metadata-editor" class="btn btn-sm btn-outline-primary"
+                                                target="_blank">
+                                                <i class="bi bi-pencil"></i> Edit Metadata
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Publish Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg" id="publish-btn">
+                                    <i class="bi bi-youtube"></i> Publish to YouTube
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar: Progress & Tips -->
+            <div class="col-lg-4">
+                <!-- Upload Progress Card -->
+                <div class="card mb-4" id="upload-progress-card" style="display:none;">
+                    <div class="card-header bg-danger text-white">
+                        <i class="bi bi-cloud-upload"></i> Uploading to YouTube...
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                    id="upload-progress-bar" role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        <p class="mb-2 small" id="upload-message">
+                            Preparing upload...
+                        </p>
+                        <p class="mb-0 small text-muted" id="upload-details">
+                            0 MB / 0 MB
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Success Card -->
+                <div class="card mb-4" id="success-card" style="display:none;">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-check-circle"></i> Published Successfully!
+                    </div>
+                    <div class="card-body">
+                        <p>Your video is now live on YouTube!</p>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-success" id="watch-btn" target="_blank">
+                                <i class="bi bi-play-circle"></i> Watch on YouTube
+                            </a>
+                            <button class="btn btn-outline-secondary" id="publish-another-btn">
+                                <i class="bi bi-arrow-repeat"></i> Publish Another
+                            </button>
+                        </div>
+                        <hr>
+                        <div class="small text-muted">
+                            <div class="mb-1">
+                                <strong>Video ID:</strong>
+                                <span id="result-video-id">-</span>
+                            </div>
+                            <div>
+                                <strong>Status:</strong>
+                                <span id="result-status">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Published Videos List -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-list-ul"></i> Recent Uploads
+                    </div>
+                    <div class="card-body" id="recent-uploads">
+                        <p class="text-muted small">No recent uploads</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/youtube-publisher.js"></script>
+
+    <style>
+        .uploaded-video-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .uploaded-video-item:last-child {
+            border-bottom: none;
+        }
+
+        .uploaded-video-item img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .uploaded-video-info {
+            flex: 1;
+        }
+
+        .uploaded-video-title {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .uploaded-video-date {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>

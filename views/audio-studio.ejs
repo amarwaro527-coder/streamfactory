@@ -1,0 +1,270 @@
+<%- layout('layouts/boilerplate')  %>
+
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="mb-3">
+        <i class="bi bi-music-note-beamed"></i> Audio Studio
+      </h1>
+      <p class="text-muted">
+        Generate high-quality ambient audio with advanced mixing and dynamic effects
+      </p>
+    </div>
+  </div>
+
+  <!-- Audio Generation Form -->
+  <div class="row">
+    <!-- Presets & Stems Selection -->
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="presets-tab" data-bs-toggle="tab" href="#presets" role="tab">
+                <i class="bi bi-star"></i> Presets
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="custom-tab" data-bs-toggle="tab" href="#custom" role="tab">
+                <i class="bi bi-sliders"></i> Custom Mix
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <!-- Presets Tab -->
+            <div class="tab-pane fade show active" id="presets" role="tabpanel">
+              <div id="presets-container" class="row g-3">
+                <!-- Loaded via JavaScript -->
+              </div>
+            </div>
+
+            <!-- Custom Mix Tab -->
+            <div class="tab-pane fade" id="custom" role="tabpanel">
+              <div id="stems-categories">
+                <!-- Loaded via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuration -->
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-gear"></i> Audio Configuration
+        </div>
+        <div class="card-body">
+          <form id="audio-config-form">
+            <!-- Duration -->
+            <div class="mb-4">
+              <label for="duration" class="form-label">
+                Duration: <span id="duration-display">1 hour</span>
+              </label>
+              <input type="range" class="form-range" id="duration" name="duration" 
+                     min="60" max="36000" step="300" value="3600">
+              <div class="d-flex justify-content-between text-muted small">
+                <span>1 min</span>
+                <span>1 hour</span>
+                <span>3 hours</span>
+                <span>10 hours</span>
+              </div>
+            </div>
+
+            <!-- Volatility -->
+            <div class="mb-4">
+              <label for="volatility" class="form-label">
+                Volume Volatility: <span id="volatility-display">0.3</span>
+                <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                   title="Controls how much volume varies over time. Higher = more dynamic."></i>
+              </label>
+              <input type="range" class="form-range" id="volatility" name="volatility" 
+                     min="0" max="1" step="0.1" value="0.3">
+              <div class="d-flex justify-content-between text-muted small">
+                <span>Subtle</span>
+                <span>Moderate</span>
+                <span>Dynamic</span>
+              </div>
+            </div>
+
+            <!-- Spatial Drift -->
+            <div class="mb-4">
+              <label for="spatialDrift" class="form-label">
+                Spatial Drift: <span id="spatial-display">0.5</span>
+                <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                   title="Controls stereo panning movement. Higher = more spatial variation."></i>
+              </label>
+              <input type="range" class="form-range" id="spatialDrift" name="spatialDrift" 
+                     min="0" max="1" step="0.1" value="0.5">
+              <div class="d-flex justify-content-between text-muted small">
+                <span>Centered</span>
+                <span>Moderate</span>
+                <span>Wide</span>
+              </div>
+            </div>
+
+            <!-- Density -->
+            <div class="mb-4">
+              <label for="density" class="form-label">
+                Layer Density: <span id="density-display">0.7</span>
+                <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                   title="Controls how many audio layers overlap. Higher = richer sound."></i>
+              </label>
+              <input type="range" class="form-range" id="density" name="density" 
+                     min="0" max="1" step="0.1" value="0.7">
+              <div class="d-flex justify-content-between text-muted small">
+                <span>Minimal</span>
+                <span>Balanced</span>
+                <span>Rich</span>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg" id="generate-btn">
+                <i class="bi bi-play-circle"></i> Generate Audio
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Selected Stems & Progress -->
+    <div class="col-lg-4">
+      <!-- Selected Stems -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="bi bi-list-check"></i> Selected Stems
+          <span class="badge bg-primary float-end" id="stem-count">0</span>
+        </div>
+        <div class="card-body">
+          <div id="selected-stems-list">
+            <p class="text-muted text-center">
+              <i class="bi bi-arrow-left"></i> Select a preset or choose stems
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Card -->
+      <div class="card" id="progress-card" style="display: none;">
+        <div class="card-header bg-success text-white">
+          <i class="bi bi-hourglass-split"></i> Generating Audio...
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="progress" style="height: 30px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                   id="progress-bar" role="progressbar" 
+                   style="width: 0%">0%</div>
+            </div>
+          </div>
+          <p class="mb-0 small text-muted" id="progress-message">
+            Initializing...
+          </p>
+          <p class="mb-0 small text-muted" id="progress-time">
+            Elapsed: 0s
+          </p>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="card" id="result-card" style="display: none;">
+        <div class="card-header bg-success text-white">
+          <i class="bi bi-check-circle"></i> Audio Generated!
+        </div>
+        <div class="card-body">
+          <audio controls class="w-100 mb-3" id="result-audio">
+            Your browser does not support the audio element.
+          </audio>
+          <div class="d-grid gap-2">
+            <a href="#" class="btn btn-primary" id="download-btn" download>
+              <i class="bi bi-download"></i> Download Audio
+            </a>
+            <button class="btn btn-outline-secondary" id="new-audio-btn">
+              <i class="bi bi-arrow-repeat"></i> Generate New
+            </button>
+          </div>
+          <hr>
+          <div class="small text-muted">
+            <div class="d-flex justify-content-between mb-1">
+              <span>File Size:</span>
+              <span id="result-size">-</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Duration:</span>
+              <span id="result-duration">-</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Generation Time:</span>
+              <span id="result-time">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preset Card Template -->
+<template id="preset-card-template">
+  <div class="col-md-6 col-lg-4">
+    <div class="card preset-card h-100" role="button" data-preset-id="">
+      <div class="card-body">
+        <h5 class="card-title">
+          <i class="bi bi-music-note"></i> <span class="preset-name"></span>
+        </h5>
+        <p class="card-text small text-muted preset-description"></p>
+        <div class="badge bg-secondary preset-stems-count"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Stem Item Template -->
+<template id="stem-item-template">
+  <div class="stem-item d-flex align-items-center mb-2">
+    <input type="checkbox" class="form-check-input me-2 stem-checkbox" data-stem-id="">
+    <span class="flex-grow-1 stem-name"></span>
+    <input type="range" class="form-range flex-grow-1 mx-2 stem-volume" 
+           min="0" max="1" step="0.1" value="0.7" style="max-width: 100px;">
+    <span class="badge bg-info stem-volume-display">70%</span>
+  </div>
+</template>
+
+<script src="/js/audio-studio.js"></script>
+
+<style>
+.preset-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.preset-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.preset-card.selected {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.stem-item {
+  padding: 8px;
+  border-radius: 5px;
+  background: #f8f9fa;
+}
+
+.stem-item:hover {
+  background: #e9ecef;
+}
+
+#selected-stems-list .stem-item {
+  background: #fff;
+  border: 1px solid #dee2e6;
+}
+</style>

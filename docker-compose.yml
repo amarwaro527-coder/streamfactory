@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    container_name: streamfactory-app
+    restart: unless-stopped
+    ports:
+      - "7576:7576"
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+      - ./logs:/app/logs
+      - ./public/uploads:/app/public/uploads
+      - ./audio-stems:/app/audio-stems
+      - ./public/audio-output:/app/public/audio-output
+      - ./public/video-output:/app/public/video-output
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Jakarta

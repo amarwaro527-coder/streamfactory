@@ -1,0 +1,297 @@
+<%- layout('layouts/boilerplate') %>
+
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-3">
+                    <i class="bi bi-robot"></i> Metadata Generator
+                </h1>
+                <p class="text-muted">
+                    Generate SEO-optimized YouTube metadata using AI or edit manually
+                </p>
+            </div>
+        </div>
+
+        <!-- Metadata Editor-->
+        <div class="row">
+            <!-- Editor Panel -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="bi bi-pencil-square"></i> Project Information
+                    </div>
+                    <div class="card-body">
+                        <form id="metadata-form">
+                            <!-- Project Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-folder"></i> Select Project
+                                </label>
+                                <select class="form-select" id="projectSelect" name="projectId">
+                                    <option value="">Select a project...</option>
+                                    <!-- Loaded via JavaScript -->
+                                </select>
+                                <div class="form-text">
+                                    Choose an audio/video project to generate metadata for
+                                </div>
+                            </div>
+
+                            <!-- Custom Instructions -->
+                            <div class="mb-4">
+                                <label for="customInstructions" class="form-label">
+                                    Custom Instructions for AI (Optional)
+                                </label>
+                                <textarea class="form-control" id="customInstructions" name="customInstructions"
+                                    rows="2"
+                                    placeholder="e.g., Target audience: students studying for exams. Tone: calm and professional."></textarea>
+                                <div class="form-text">
+                                    Provide specific instructions to customize AI-generated metadata
+                                </div>
+                            </div>
+
+                            <!-- AI Generate Button -->
+                            <div class="d-grid mb-4">
+                                <button type="button" class="btn btn-primary btn-lg" id="ai-generate-btn">
+                                    <i class="bi bi-stars"></i> Generate with AI
+                                </button>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3">YouTube Metadata</h5>
+
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label for="metaTitle" class="form-label">
+                                    Title <span class="text-danger">*</span>
+                                    <span class="text-muted small" id="title-char-count">(0/100)</span>
+                                </label>
+                                <input type="text" class="form-control" id="metaTitle" name="title" maxlength="100"
+                                    required>
+                                <div class="form-text">
+                                    YouTube title (max 100 characters, recommended 60-70)
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label for="metaDescription" class="form-label">
+                                    Description
+                                    <span class="text-muted small" id="desc-char-count">(0/5000)</span>
+                                </label>
+                                <textarea class="form-control" id="metaDescription" name="description" rows="12"
+                                    maxlength="5000"></textarea>
+                                <div class="form-text">
+                                    Detailed description (max 5000 characters, recommended 500-1000)
+                                </div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="mb-4">
+                                <label for="metaTags" class="form-label">
+                                    Tags
+                                    <span class="text-muted small" id="tags-count">(0 tags)</span>
+                                </label>
+                                <div id="tags-container" class="border rounded p-3 mb-2">
+                                    <div id="tags-display" class="mb-2">
+                                        <span class="text-muted small">No tags added yet</span>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="tagInput"
+                                            placeholder="Type a tag and press Enter">
+                                        <button class="btn btn-outline-secondary" type="button" id="add-tag-btn">
+                                            <i class="bi bi-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-text">
+                                    Add relevant keywords/tags (recommended 20-30 tags)
+                                </div>
+                                <input type="hidden" id="metaTags" name="tags">
+                            </div>
+
+                            <!-- Category -->
+                            <div class="mb-4">
+                                <label for="metaCategory" class="form-label">
+                                    Category
+                                </label>
+                                <select class="form-select" id="metaCategory" name="category">
+                                    <option value="">Select category...</option>
+                                    <option value="1">Film & Animation</option>
+                                    <option value="2">Autos & Vehicles</option>
+                                    <option value="10">Music</option>
+                                    <option value="15">Pets & Animals</option>
+                                    <option value="17">Sports</option>
+                                    <option value="19">Travel & Events</option>
+                                    <option value="20">Gaming</option>
+                                    <option value="22">People & Blogs</option>
+                                    <option value="23">Comedy</option>
+                                    <option value="24">Entertainment</option>
+                                    <option value="25">News & Politics</option>
+                                    <option value="26">Howto & Style</option>
+                                    <option value="27">Education</option>
+                                    <option value="28">Science & Technology</option>
+                                    <option value="29">Nonprofits & Activism</option>
+                                </select>
+                            </div>
+
+                            <!-- Privacy Status -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Privacy Status
+                                </label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="privacy" id="privacyPublic"
+                                        value="public" checked>
+                                    <label class="btn btn-outline-primary" for="privacyPublic">
+                                        <i class="bi bi-globe"></i> Public
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="privacy" id="privacyUnlisted"
+                                        value="unlisted">
+                                    <label class="btn btn-outline-primary" for="privacyUnlisted">
+                                        <i class="bi bi-link"></i> Unlisted
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="privacy" id="privacyPrivate"
+                                        value="private">
+                                    <label class="btn btn-outline-primary" for="privacyPrivate">
+                                        <i class="bi bi-lock"></i> Private
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Save Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-save"></i> Save Metadata
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="clear-btn">
+                                    <i class="bi bi-x-circle"></i> Clear Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar: Preview & Tips -->
+            <div class="col-lg-4">
+                <!-- AI Status Card -->
+                <div class="card mb-4" id="ai-status-card">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-robot"></i> AI Status
+                    </div>
+                    <div class="card-body">
+                        <div id="ai-available">
+                            <p class="mb-0">
+                                <i class="bi bi-check-circle-fill text-success"></i> AI Ready
+                            </p>
+                            <small class="text-muted">Gemini Pro available</small>
+                        </div>
+                        <div id="ai-unavailable" style="display:none;">
+                            <p class="mb-0">
+                                <i class="bi bi-x-circle-fill text-danger"></i> AI Unavailable
+                            </p>
+                            <small class="text-muted">Configure GEMINI_API_KEY in settings</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-eye"></i> YouTube Preview
+                    </div>
+                    <div class="card-body">
+                        <div class="youtube-preview">
+                            <!-- Title Preview -->
+                            <h6 class="mb-2" id="preview-title"
+                                style="color: #030303; font-size: 18px; line-height: 1.2;">
+                                Your title will appear here
+                            </h6>
+                            <!-- Description Preview -->
+                            <p class="small text-muted mb-2" style="font-size: 12px;" id="preview-desc">
+                                Your description will appear here...
+                            </p>
+                            <!-- Tags Preview -->
+                            <div id="preview-tags" class="mb-2">
+                                <small class="text-muted">No tags</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-lightbulb"></i> SEO Tips
+                    </div>
+                    <div class="card-body">
+                        <ul class="small mb-0">
+                            <li class="mb-2">
+                                <strong>Title:</strong> Front-load keywords, include duration
+                            </li>
+                            <li class="mb-2">
+                                <strong>Description:</strong> First 2-3 lines are critical (shown before "Show more")
+                            </li>
+                            <li class="mb-2">
+                                <strong>Tags:</strong> Mix broad and specific keywords
+                            </li>
+                            <li class="mb-2">
+                                <strong>Category:</strong> Choose most relevant for better discovery
+                            </li>
+                            <li>
+                                <strong>AI:</strong> Review and customize AI-generated content for best results
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/metadata-editor.js"></script>
+
+    <style>
+        .tag-badge {
+            display: inline-block;
+            background: #0d6efd;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 12px;
+        }
+
+        .tag-badge .remove-tag {
+            cursor: pointer;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .tag-badge .remove-tag:hover {
+            color: #ffcccb;
+        }
+
+        .youtube-preview {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        #preview-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        #preview-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
