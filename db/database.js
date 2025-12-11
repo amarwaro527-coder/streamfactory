@@ -78,6 +78,106 @@ function getAll(sql, params = []) {
     });
 }
 
+// Initialize database tables
+async function initializeDatabase() {
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            // Create users table (from Streamflow)
+            db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT,
+          user_role TEXT DEFAULT 'user',
+          status TEXT DEFAULT 'active',
+          avatar TEXT,
+          youtube_access_token TEXT,
+          youtube_refresh_token TEXT,
+          gemini_api_key TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `, (err) => {
+                if (err) {
+                    console.error('❌ Error creating users table:', err.message);
+                    return reject(err);
+                }
+                console.log('✅ Users table created/verified');
+            });
+
+            // Create streams table (from Streamflow)
+            db.run(`
+        CREATE TABLE IF NOT EXISTS streams (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          platform TEXT NOT NULL,
+          stream_key TEXT,
+          stream_url TEXT,
+          status TEXT DEFAULT 'offline',
+          title TEXT,
+          description TEXT,
+          thumbnail TEXT,
+          scheduled_time DATETIME,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+                if (err) console.error('⚠️  Error creating streams table:', err.message);
+            });
+
+            // Create videos table (from Streamflow)
+            db.run(`
+        CREATE TABLE IF NOT EXISTS videos (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT,
+          file_path TEXT NOT NULL,
+          thumbnail TEXT,
+          duration INTEGER,
+          file_size INTEGER,
+          status TEXT DEFAULT 'ready',
+          upload_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+                if (err) console.error('⚠️  Error creating videos table:', err.message);
+            });
+
+            // Create playlists table (from Streamflow)
+            db.run(`
+        CREATE TABLE IF NOT EXISTS playlists (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          name TEXT NOT NULL,
+          description TEXT,
+          thumbnail TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+                if (err) console.error('⚠️  Error creating playlists table:', err.message);
+            });
+
+            // Create playlist_videos join table
+            db.run(`
+        CREATE TABLE IF NOT EXISTS playlist_videos (
+          id TEXT PRIMARY KEY,
+          playlist_id TEXT NOT NULL,
+          video_id TEXT NOT NULL,
+          position INTEGER DEFAULT 0,
+          FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+          FOREIGN KEY (video_id) REFERENCES videos(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+                if (err) console.error('⚠️  Error creating playlist_videos table:', err.message);
+                console.log('✅ Database initialization complete');
+                resolve();
+            });
+        });
+    });
+}
+
 // Graceful shutdown
 process.on('SIGINT', () => {
     db.close((err) => {
@@ -93,6 +193,7 @@ process.on('SIGINT', () => {
 module.exports = {
     db,
     checkIfUsersExist,
+    initializeDatabase,
     runQuery,
     getOne,
     getAll
