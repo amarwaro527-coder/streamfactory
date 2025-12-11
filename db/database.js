@@ -82,7 +82,7 @@ function getAll(sql, params = []) {
 async function initializeDatabase() {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            // Create users table (from Streamflow)
+            // Create users table (from Streamflow) - FIXED
             db.run(`
         CREATE TABLE IF NOT EXISTS users (
           id TEXT PRIMARY KEY,
@@ -91,7 +91,7 @@ async function initializeDatabase() {
           email TEXT,
           user_role TEXT DEFAULT 'user',
           status TEXT DEFAULT 'active',
-          avatar TEXT,
+          avatar_path TEXT,
           youtube_access_token TEXT,
           youtube_refresh_token TEXT,
           gemini_api_key TEXT,
@@ -105,20 +105,31 @@ async function initializeDatabase() {
                 console.log('✅ Users table created/verified');
             });
 
-            // Create streams table (from Streamflow)
+            // Create streams table (from Streamflow) - COMPLETE FIXED SCHEMA!
             db.run(`
         CREATE TABLE IF NOT EXISTS streams (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
-          platform TEXT NOT NULL,
-          stream_key TEXT,
-          stream_url TEXT,
-          status TEXT DEFAULT 'offline',
           title TEXT,
-          description TEXT,
-          thumbnail TEXT,
-          scheduled_time DATETIME,
+          video_id TEXT,
+          rtmp_url TEXT,
+          stream_key TEXT,
+          platform TEXT,
+          platform_icon TEXT,
+          bitrate INTEGER DEFAULT 2500,
+          resolution TEXT,
+          fps INTEGER DEFAULT 30,
+          orientation TEXT DEFAULT 'horizontal',
+          loop_video INTEGER DEFAULT 1,
+          schedule_time DATETIME,
+          end_time DATETIME,
+          start_time DATETIME,
+          duration INTEGER,
+          status TEXT DEFAULT 'offline',
+          status_updated_at DATETIME,
+          use_advanced_settings INTEGER DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `, (err) => {
